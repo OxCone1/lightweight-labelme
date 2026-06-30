@@ -13,3 +13,8 @@
 .DS_Store
 .idea/
 .venv/
+
+build/
+dist/
+*.spec
+labelme_launcher.py
