@@ -31,8 +31,6 @@ shape:
   hvertex_fill_color: [255, 255, 255, 255]
   point_size: 8
   show_labels: false
-ai:
-  default: Sam2 (balanced)
 # main
 flag_dock:
   show: true
@@ -80,8 +78,6 @@ canvas:
     line: false
     point: false
     linestrip: false
-    ai_points_to_shape: false
-    ai_box_to_shape: true
 shortcuts:
   close: Ctrl+W
   open: Ctrl+O
