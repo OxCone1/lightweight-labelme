@@ -50,7 +50,7 @@ jobs:
         shell: pwsh
         run: |
           $vtLink = $env:VT_ANALYSIS
-          if ($vtLink) { $vtLink = ($vtLink -split '=')[-1] } else { $vtLink = "https://www.virustotal.com/gui/file/$env:sha256/detection" }
+          if ($vtLink) { $vtLink = ($vtLink -split '=', 2)[-1] } else { $vtLink = "https://www.virustotal.com/gui/file/$env:sha256/detection" }
 
           $notes = "SHA256: $env:sha256`n`nVirusTotal: $vtLink"
           $notesFile = "$env:RUNNER_TEMP/notes.md"
@@ -71,7 +71,7 @@ jobs:
         shell: pwsh
         run: |
           $vtLink = $env:VT_ANALYSIS
-          if ($vtLink) { $vtLink = ($vtLink -split '=')[-1] } else { $vtLink = "https://www.virustotal.com/gui/file/$env:sha256/detection" }
+          if ($vtLink) { $vtLink = ($vtLink -split '=', 2)[-1] } else { $vtLink = "https://www.virustotal.com/gui/file/$env:sha256/detection" }
 
           $notes = "SHA256: $env:sha256`n`nVirusTotal: $vtLink"
           $notesFile = "$env:RUNNER_TEMP/notes.md"
