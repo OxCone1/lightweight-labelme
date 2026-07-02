@@ -11,6 +11,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: OxCone1/labelme
+          path: labelme
+          token: ${{ secrets.HEAT_SENTINEL_TOKEN }}
 
       - uses: actions/setup-python@v5
         with:
@@ -20,11 +24,13 @@ jobs:
         run: pip install uv
 
       - name: Install dependencies
+        working-directory: labelme
         run: |
           uv pip install --system -e .
           uv pip install --system pyinstaller
 
       - name: Build EXE with PyInstaller
+        working-directory: labelme
         run: pyinstaller labelme.spec
 
       - name: Create release and upload EXE to HEAT-Sentinel
