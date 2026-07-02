@@ -11,10 +11,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          repository: OxCone1/labelme
-          path: labelme
-          token: ${{ secrets.HEAT_SENTINEL_TOKEN }}
 
       - uses: actions/setup-python@v5
         with:
@@ -38,7 +34,7 @@ jobs:
           GH_TOKEN: ${{ secrets.HEAT_SENTINEL_TOKEN }}
         run: |
           $tag = "build-$env:GITHUB_SHA".Substring(0, 20)
-          gh release create $tag "dist/labelme.exe#labelme.exe" `
+          gh release create $tag "labelme/dist/labelme.exe#labelme.exe" `
             --repo "OxCone1/HEAT-Sentinel" `
             --title "Build $($env:GITHUB_SHA.Substring(0,7))" `
             --notes "Auto-built from commit $env:GITHUB_SHA"
