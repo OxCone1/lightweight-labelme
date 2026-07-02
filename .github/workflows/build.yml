@@ -20,21 +20,19 @@ jobs:
         run: pip install uv
 
       - name: Install dependencies
-        working-directory: labelme
         run: |
           uv pip install --system -e .
           uv pip install --system pyinstaller
 
       - name: Build EXE with PyInstaller
-        working-directory: labelme
         run: pyinstaller labelme.spec
 
-      - name: Create release and upload EXE to HEAT-Sentinel
+      - name: Upload EXE to HEAT-Sentinel release
         env:
           GH_TOKEN: ${{ secrets.HEAT_SENTINEL_TOKEN }}
         run: |
-          $tag = "build-$env:GITHUB_SHA".Substring(0, 20)
-          gh release create $tag "labelme/dist/labelme.exe#labelme.exe" `
-            --repo "OxCone1/HEAT-Sentinel" `
-            --title "Build $($env:GITHUB_SHA.Substring(0,7))" `
-            --notes "Auto-built from commit $env:GITHUB_SHA"
+          $tag = "0.1.0"
+          gh release create $tag --repo "OxCone1/HEAT-Sentinel" `
+            --title $tag --notes "Auto-built from commit $env:GITHUB_SHA" 2> $null
+          gh release upload $tag "dist/labelme.exe#labelme.exe" `
+            --clobber --repo "OxCone1/HEAT-Sentinel"
