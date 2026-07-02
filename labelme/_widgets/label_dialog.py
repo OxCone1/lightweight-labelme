@@ -65,9 +65,7 @@ class LabelDialog(QtWidgets.QDialog):
 
         self.edit_group_id = QtWidgets.QLineEdit()
         self.edit_group_id.setPlaceholderText(_GROUP_ID_PLACEHOLDER)
-        self.edit_group_id.setValidator(
-            QtGui.QRegularExpressionValidator(QtCore.QRegularExpression(r"[0-9]*"))
-        )
+        self.edit_group_id.setValidator(QtGui.QIntValidator())
 
         self.edit_description = QtWidgets.QTextEdit()
         self.edit_description.setPlaceholderText(_DESCRIPTION_PLACEHOLDER)
