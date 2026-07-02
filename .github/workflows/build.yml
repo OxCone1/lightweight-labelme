@@ -27,12 +27,46 @@ jobs:
       - name: Build EXE with PyInstaller
         run: pyinstaller labelme.spec
 
-      - name: Upload EXE to HEAT-Sentinel release
+      - name: Compute SHA256 and upload to VirusTotal
+        env:
+          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+        shell: pwsh
+        run: |
+          $sha256 = (Get-FileHash -Algorithm SHA256 dist/labelme.exe).Hash.ToLower()
+          echo "sha256=$sha256" >> $env:GITHUB_ENV
+
+          $vtResponse = curl.exe -s -X POST "https://www.virustotal.com/api/v3/files" `
+            -H "x-apikey: $env:VT_API_KEY" `
+            -F "file=@dist/labelme.exe" | ConvertFrom-Json
+
+          echo "vtLink=https://www.virustotal.com/gui/file/$sha256/detection" >> $env:GITHUB_ENV
+
+      - name: Upload to current repo (latest)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $notes = @"
+          SHA256: $env:sha256
+
+          VirusTotal: $env:vtLink
+          "@
+          $tag = "latest"
+          gh release create $tag --title "Latest Build" --notes $notes 2> $null
+          gh release upload $tag "dist/labelme.exe#labelme.exe" --clobber
+          gh release edit $tag --notes $notes
+
+      - name: Upload to HEAT-Sentinel (0.1.0)
         env:
           GH_TOKEN: ${{ secrets.HEAT_SENTINEL_TOKEN }}
+        shell: pwsh
         run: |
+          $notes = @"
+          SHA256: $env:sha256
+
+          VirusTotal: $env:vtLink
+          "@
           $tag = "0.1.0"
-          gh release create $tag --repo "OxCone1/HEAT-Sentinel" `
-            --title $tag --notes "Auto-built from commit $env:GITHUB_SHA" 2> $null
-          gh release upload $tag "dist/labelme.exe#labelme.exe" `
-            --clobber --repo "OxCone1/HEAT-Sentinel"
+          gh release create $tag --repo "OxCone1/HEAT-Sentinel" --title $tag --notes $notes 2> $null
+          gh release upload $tag "dist/labelme.exe#labelme.exe" --clobber --repo "OxCone1/HEAT-Sentinel"
+          gh release edit $tag --repo "OxCone1/HEAT-Sentinel" --notes $notes
