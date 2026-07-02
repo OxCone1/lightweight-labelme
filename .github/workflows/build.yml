@@ -56,8 +56,8 @@ jobs:
           $notesFile = "$env:RUNNER_TEMP/notes.md"
           Set-Content -Path $notesFile -Value $notes -Encoding utf8
 
-          $tag = "latest"
-          gh release create $tag --title "Latest Build" --notes-file $notesFile 2> $null
+          $tag = "light-labelme-1.0"
+          gh release create $tag --title "Light-Labelme 1.0" --notes-file $notesFile 2> $null
           if ($LASTEXITCODE -ne 0) {
             Write-Host "Release already exists, updating..."
           }
@@ -77,8 +77,8 @@ jobs:
           $notesFile = "$env:RUNNER_TEMP/notes.md"
           Set-Content -Path $notesFile -Value $notes -Encoding utf8
 
-          $tag = "0.1.0"
-          gh release create $tag --repo "OxCone1/HEAT-Sentinel" --title $tag --notes-file $notesFile 2> $null
+          $tag = "light-labelme-1.0"
+          gh release create $tag --repo "OxCone1/HEAT-Sentinel" --title "Light-Labelme 1.0" --notes-file $notesFile 2> $null
           if ($LASTEXITCODE -ne 0) {
             Write-Host "Release already exists, updating..."
           }
