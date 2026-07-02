@@ -1,0 +1,38 @@
+name: Build EXE and Upload to HEAT-Sentinel
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: |
+          uv pip install --system -e .
+          uv pip install --system pyinstaller
+
+      - name: Build EXE with PyInstaller
+        run: pyinstaller labelme.spec
+
+      - name: Create release and upload EXE to HEAT-Sentinel
+        env:
+          GH_TOKEN: ${{ secrets.HEAT_SENTINEL_TOKEN }}
+        run: |
+          $tag = "build-$env:GITHUB_SHA".Substring(0, 20)
+          gh release create $tag "dist/labelme.exe#labelme.exe" `
+            --repo "OxCone1/HEAT-Sentinel" `
+            --title "Build $($env:GITHUB_SHA.Substring(0,7))" `
+            --notes "Auto-built from commit $env:GITHUB_SHA"
