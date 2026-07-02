@@ -49,15 +49,17 @@ jobs:
           $vtLink = $env:VT_ANALYSIS
           if ($vtLink) { $vtLink = ($vtLink -split '=')[-1] } else { $vtLink = "https://www.virustotal.com/gui/file/$env:sha256/detection" }
 
-          $notes = @"
-          SHA256: $env:sha256
+          $notes = "SHA256: $env:sha256`n`nVirusTotal: $vtLink"
+          $notesFile = "$env:RUNNER_TEMP/notes.md"
+          Set-Content -Path $notesFile -Value $notes -Encoding utf8
 
-          VirusTotal: $vtLink
-          "@
           $tag = "latest"
-          gh release create $tag --title "Latest Build" --notes $notes 2> $null
+          gh release create $tag --title "Latest Build" --notes-file $notesFile 2> $null
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "Release already exists, updating..."
+          }
           gh release upload $tag "dist/labelme.exe#labelme.exe" --clobber
-          gh release edit $tag --notes $notes
+          gh release edit $tag --notes-file $notesFile
 
       - name: Upload to HEAT-Sentinel (0.1.0)
         env:
@@ -68,12 +70,14 @@ jobs:
           $vtLink = $env:VT_ANALYSIS
           if ($vtLink) { $vtLink = ($vtLink -split '=')[-1] } else { $vtLink = "https://www.virustotal.com/gui/file/$env:sha256/detection" }
 
-          $notes = @"
-          SHA256: $env:sha256
+          $notes = "SHA256: $env:sha256`n`nVirusTotal: $vtLink"
+          $notesFile = "$env:RUNNER_TEMP/notes.md"
+          Set-Content -Path $notesFile -Value $notes -Encoding utf8
 
-          VirusTotal: $vtLink
-          "@
           $tag = "0.1.0"
-          gh release create $tag --repo "OxCone1/HEAT-Sentinel" --title $tag --notes $notes 2> $null
+          gh release create $tag --repo "OxCone1/HEAT-Sentinel" --title $tag --notes-file $notesFile 2> $null
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "Release already exists, updating..."
+          }
           gh release upload $tag "dist/labelme.exe#labelme.exe" --clobber --repo "OxCone1/HEAT-Sentinel"
-          gh release edit $tag --repo "OxCone1/HEAT-Sentinel" --notes $notes
+          gh release edit $tag --repo "OxCone1/HEAT-Sentinel" --notes-file $notesFile
