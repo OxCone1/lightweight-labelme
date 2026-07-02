@@ -27,29 +27,32 @@ jobs:
       - name: Build EXE with PyInstaller
         run: pyinstaller labelme.spec
 
-      - name: Compute SHA256 and upload to VirusTotal
-        env:
-          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+      - name: Compute SHA256
         shell: pwsh
         run: |
           $sha256 = (Get-FileHash -Algorithm SHA256 dist/labelme.exe).Hash.ToLower()
           echo "sha256=$sha256" >> $env:GITHUB_ENV
 
-          $vtResponse = curl.exe -s -X POST "https://www.virustotal.com/api/v3/files" `
-            -H "x-apikey: $env:VT_API_KEY" `
-            -F "file=@dist/labelme.exe" | ConvertFrom-Json
-
-          echo "vtLink=https://www.virustotal.com/gui/file/$sha256/detection" >> $env:GITHUB_ENV
+      - name: VirusTotal Scan
+        id: vt
+        uses: crazy-max/ghaction-virustotal@v5
+        with:
+          vt_api_key: ${{ secrets.VT_API_KEY }}
+          files: ./dist/labelme.exe
 
       - name: Upload to current repo (latest)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VT_ANALYSIS: ${{ steps.vt.outputs.analysis }}
         shell: pwsh
         run: |
+          $vtLink = $env:VT_ANALYSIS
+          if ($vtLink) { $vtLink = ($vtLink -split '=')[-1] } else { $vtLink = "https://www.virustotal.com/gui/file/$env:sha256/detection" }
+
           $notes = @"
           SHA256: $env:sha256
 
-          VirusTotal: $env:vtLink
+          VirusTotal: $vtLink
           "@
           $tag = "latest"
           gh release create $tag --title "Latest Build" --notes $notes 2> $null
@@ -59,12 +62,16 @@ jobs:
       - name: Upload to HEAT-Sentinel (0.1.0)
         env:
           GH_TOKEN: ${{ secrets.HEAT_SENTINEL_TOKEN }}
+          VT_ANALYSIS: ${{ steps.vt.outputs.analysis }}
         shell: pwsh
         run: |
+          $vtLink = $env:VT_ANALYSIS
+          if ($vtLink) { $vtLink = ($vtLink -split '=')[-1] } else { $vtLink = "https://www.virustotal.com/gui/file/$env:sha256/detection" }
+
           $notes = @"
           SHA256: $env:sha256
 
-          VirusTotal: $env:vtLink
+          VirusTotal: $vtLink
           "@
           $tag = "0.1.0"
           gh release create $tag --repo "OxCone1/HEAT-Sentinel" --title $tag --notes $notes 2> $null
